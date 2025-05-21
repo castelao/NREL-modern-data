@@ -1,7 +1,11 @@
+
+import logging
+
 import h5py
 import pandas as pd
 import xarray as xr
 
+module_logger = logging.getLogger(__name__)
 
 def extract_meta(filename):
     """Extract variables embeded in 'meta'"""
@@ -68,6 +72,7 @@ def fix_time(ds):
     # ds.["time"].attrs["calendar"]
 
     # We don't need this anymore
+    module_logger.debug(f"Removing time_index variable with time as a string.")
     ds = ds.drop_vars(["time_index"])
 
     return ds
