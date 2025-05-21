@@ -61,9 +61,15 @@ def fix_time(ds):
     """
     assert "time_index" in ds
 
-    # Rename the phony dimension to time
-    assert len(ds["time_index"].dims) == 1
-    ds = ds.rename_dims({ds["time_index"].dims[0]: "time"})
+    # Warn if it is not what we expected
+    assert len(ds["time_index"].dims) == 1, "Expected time to be 1D"
+    if not ds["time_index"].dims[0].startswith("phony_dim_"):
+        module_logger.warning("Expected a phony_dim_ dimension")
+
+    assert "time" not in ds, "Expected time to be a new dimension"
+    time_dim = ds["time_index"].dims[0]
+    module_logger.debug(f"Renaming {time_dim} to time")
+    ds = ds.rename_dims({time_dim: "time"})
 
     assert ds["time_index"].dtype.kind == "U", "Expected a `time_index` of type unicode"
     ds["time"] = pd.DatetimeIndex(ds["time_index"].values)
