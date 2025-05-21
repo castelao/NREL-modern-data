@@ -26,7 +26,7 @@ def fix_variable(da):
     encoding = da.encoding
     encoding = {}
     if "fill_value" in da.attrs:
-        print(f"Fixing fill value for {da.name}, {da.attrs['fill_value']}")
+        module_logger.debug(f"Fixing fill value for {da.name}, {da.attrs['fill_value']}")
         da = da.where(da != da.attrs["fill_value"])
         attrs.pop("fill_value")
         # encoding["_FillValue"] = da.attrs.pop("fill_value")
@@ -37,7 +37,7 @@ def fix_variable(da):
             da = da + da.attrs["offset"]
 
         else:
-            print(f"Fixing scaling factor for {da.name}, {da.attrs['scale_factor']}")
+            module_logger.debug(f"Fixing scaling factor for {da.name}, {da.attrs['scale_factor']}")
             da = da / da.attrs["scale_factor"]
             # da.encoding["scale_factor"] = 1 / attrs.pop("scale_factor")
 
