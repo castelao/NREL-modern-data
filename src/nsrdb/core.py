@@ -1,14 +1,13 @@
 """Convert NSRDB data model"""
 
-
 import xarray as xr
 from mylib import *
 
 h5filename = "/datasets/NSRDB/current/nsrdb_2000.h5"
 
+
 def NSRDB_legacy_to_xarray(h5filename):
-    """Convert legacy NSRDB (HDF5) to xarray dataset
-    """
+    """Convert legacy NSRDB (HDF5) to xarray dataset"""
     ds = xr.open_mfdataset(h5filename, mask_and_scale=False, engine="netcdf4")
     ds = fix_time(ds)
     # What to do with timezone??
@@ -25,16 +24,14 @@ def NSRDB_legacy_to_xarray(h5filename):
 
     # Think about if we want to call that dimension as `location`!
 
-
-    #ds["lat"] = ds.coordinates.isel(phony_dim_1=0)
-    #ds["lon"] = ds.coordinates.isel(phony_dim_1=1)
-    #ds = ds.drop_vars(["coordinates"])
+    # ds["lat"] = ds.coordinates.isel(phony_dim_1=0)
+    # ds["lon"] = ds.coordinates.isel(phony_dim_1=1)
+    # ds = ds.drop_vars(["coordinates"])
     ds = ds.rename_dims({"phony_dim_1": "location"})
     # ds = ds.set_coords(["lat", "lon"])
 
     # What is the correct name for 'timezone' coordinate
     # Missing all the attributes for meta variables. For instance, attributes for lat/lon
-
 
     for v in extract_meta(h5filename):
         ds[v.name] = v
@@ -52,10 +49,8 @@ def NSRDB_legacy_to_xarray(h5filename):
 
 
 def NSRDB_legacy_to_zarr(h5filename, zarrfilename):
-    """Convert legacy NSRDB (HDF5) to Zarr format
-    """
+    """Convert legacy NSRDB (HDF5) to Zarr format"""
     ds = NSRDB_legacy_to_xarray(h5filename)
     # Missing some cleaning and checks such as removing chunk attrs and
     # defining optimal output encoding.
     ds.to_zarr(zarrfilename, mode="w", consolidated=True)
-
