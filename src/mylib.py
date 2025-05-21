@@ -22,6 +22,17 @@ def extract_meta(filename, dim_name="location"):
 
 
 def fix_variable(da):
+    """Fix variables
+
+    The legacy data model didn't follow conventional standards, requiring some
+    manual adjustments. For instance, the scale factor has opposite behavior
+    if adder (offset) is present, which is a very dangerous choice. To be able
+    to apply the scale factor and offset we need to first flag any fill value
+    (missing value).
+
+    da: xarray.DataArray
+        A DataArray to be fixed
+    """
     attrs = da.attrs
     encoding = da.encoding
     encoding = {}
