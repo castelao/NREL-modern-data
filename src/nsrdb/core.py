@@ -1,7 +1,7 @@
 """Convert NSRDB data model"""
 
 import xarray as xr
-from mylib import *
+from mylib import extract_meta, fix_time, fix_variable
 
 h5filename = "/datasets/NSRDB/current/nsrdb_2000.h5"
 
