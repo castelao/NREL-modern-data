@@ -72,7 +72,7 @@ def fix_time(ds):
     ds = ds.rename_dims({time_dim: "time"})
 
     assert ds["time_index"].dtype.kind == "U", "Expected a `time_index` of type unicode"
-    ds["time"] = pd.DatetimeIndex(ds["time_index"].values)
+    ds["time"] = pd.to_datetime(ds["time_index"].values)
 
     # Figure out which type of calendar it is
     # ds.["time"].attrs["calendar"]
