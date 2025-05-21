@@ -7,14 +7,14 @@ import xarray as xr
 
 module_logger = logging.getLogger(__name__)
 
-def extract_meta(filename):
+def extract_meta(filename, dim_name="location"):
     """Extract variables embeded in 'meta'"""
     with h5py.File(filename, "r") as h5f:
         for vname in h5f["meta"].dtype.names:
             yield xr.DataArray(
                 h5f["meta"][vname][:],
                 name=vname,
-                dims=("location",),
+                dims=(dim_name,),
                 attrs=dict(
                     description="Extracted from meta variable",
                 ),
