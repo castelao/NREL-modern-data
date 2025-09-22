@@ -162,6 +162,7 @@ tests = "pytest --durations=20 tests"
 
 [tool.pixi.dependencies]
 python = "~=3.12.0"
+click = ">=8.3.0,<9"
 dask = ">=2025.9.1,<2026"
 dask-labextension = ">=7.0.0,<8"
 h5py = ">=3.14.0,<4"

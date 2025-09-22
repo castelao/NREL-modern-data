@@ -14686,8 +14686,8 @@ packages:
   timestamp: 1733408419340
 - pypi: ./
   name: nrel-modern-data
-  version: 0.1.dev8+gbe8c6fbf1.d20250922
-  sha256: c1625e95e6b4cbf7e85ad5f12649a0d1f14b1ef397581cf1a75a243e7bf133c5
+  version: 0.1.dev12+g214a63104.d20250922
+  sha256: 39021fe2cc5c8449a90e99be92067718cda44915675c8bda7fd95c7361008da9
   requires_dist:
   - click>=8.0.0
   - dask>=2024.8.1
