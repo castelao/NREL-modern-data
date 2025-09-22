@@ -75,7 +75,7 @@ documentation = "https://github.com/castelao/NREL-modern-data"
 repository = "https://github.com/castelao/NREL-modern-data"
 
 [tool.ruff]
-line-length = 79
+line-length = 100
 
 [tool.ruff.format]
 quote-style = "double"
