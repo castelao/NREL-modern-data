@@ -1,16 +1,20 @@
+
+import logging
+
 import h5py
 import pandas as pd
 import xarray as xr
 
+module_logger = logging.getLogger(__name__)
 
-def extract_meta(filename):
+def extract_meta(filename, dim_name="location"):
     """Extract variables embeded in 'meta'"""
     with h5py.File(filename, "r") as h5f:
         for vname in h5f["meta"].dtype.names:
             yield xr.DataArray(
                 h5f["meta"][vname][:],
                 name=vname,
-                dims=("location",),
+                dims=(dim_name,),
                 attrs=dict(
                     description="Extracted from meta variable",
                 ),
@@ -18,11 +22,22 @@ def extract_meta(filename):
 
 
 def fix_variable(da):
+    """Fix variables
+
+    The legacy data model didn't follow conventional standards, requiring some
+    manual adjustments. For instance, the scale factor has opposite behavior
+    if adder (offset) is present, which is a very dangerous choice. To be able
+    to apply the scale factor and offset we need to first flag any fill value
+    (missing value).
+
+    da: xarray.DataArray
+        A DataArray to be fixed
+    """
     attrs = da.attrs
     encoding = da.encoding
     encoding = {}
     if "fill_value" in da.attrs:
-        print(f"Fixing fill value for {da.name}, {da.attrs['fill_value']}")
+        module_logger.debug(f"Fixing fill value for {da.name}, {da.attrs['fill_value']}")
         da = da.where(da != da.attrs["fill_value"])
         attrs.pop("fill_value")
         # encoding["_FillValue"] = da.attrs.pop("fill_value")
@@ -33,7 +48,7 @@ def fix_variable(da):
             da = da + da.attrs["offset"]
 
         else:
-            print(f"Fixing scaling factor for {da.name}, {da.attrs['scale_factor']}")
+            module_logger.debug(f"Fixing scaling factor for {da.name}, {da.attrs['scale_factor']}")
             da = da / da.attrs["scale_factor"]
             # da.encoding["scale_factor"] = 1 / attrs.pop("scale_factor")
 
@@ -57,17 +72,24 @@ def fix_time(ds):
     """
     assert "time_index" in ds
 
-    # Rename the phony dimension to time
-    assert len(ds["time_index"].dims) == 1
-    ds = ds.rename_dims({ds["time_index"].dims[0]: "time"})
+    # Warn if it is not what we expected
+    assert len(ds["time_index"].dims) == 1, "Expected time to be 1D"
+    if not ds["time_index"].dims[0].startswith("phony_dim_"):
+        module_logger.warning("Expected a phony_dim_ dimension")
+
+    assert "time" not in ds, "Expected time to be a new dimension"
+    time_dim = ds["time_index"].dims[0]
+    module_logger.debug(f"Renaming {time_dim} to time")
+    ds = ds.rename_dims({time_dim: "time"})
 
     assert ds["time_index"].dtype.kind == "U", "Expected a `time_index` of type unicode"
-    ds["time"] = pd.DatetimeIndex(ds["time_index"].values)
+    ds["time"] = pd.to_datetime(ds["time_index"].values)
 
     # Figure out which type of calendar it is
     # ds.["time"].attrs["calendar"]
 
     # We don't need this anymore
+    module_logger.debug(f"Removing time_index variable with time as a string.")
     ds = ds.drop_vars(["time_index"])
 
     return ds
